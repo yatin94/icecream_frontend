@@ -1,0 +1,136 @@
+/* Styles for the entire app to occupy the full page */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Navigation styles */
+nav {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 20px;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+nav ul li {
+  display: inline;
+  margin-right: 10px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+nav ul li a:hover {
+  color: #007BFF;
+}
+
+/* Styles for the current bill to show as a full-length notepad */
+.current-bill {
+  height: 75%;
+  overflow-y: auto;
+  margin: 10px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  line-height: 1.5em;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.bill-footer {
+  height: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  margin: 10px;
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.order-item {
+  border-bottom: 1px dashed #ccc;
+  padding: 2px 0;
+}
+
+/* Styles for the flavor buttons container */
+.flavor-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.square-button {
+  width: 150px;
+  height: 150px;
+  padding: 0;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.square-button:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.type-buttons, .size-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+
+
+.card-title {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+}
+
+.order-item {
+  font-size: 16px;
+  margin: 5px 0;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.bill-footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+
+
+.payment-buttons, .flavor-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.payment-button, .square-button {
+  flex-grow: 1;
+}

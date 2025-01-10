@@ -1,0 +1,150 @@
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import './Analytics.css';
+
+function Analytics() {
+    const [totalSaleAmount, setTotalSaleAmount] = useState(0) //Total sale amount
+    const [totalCone, setTotalCone] = useState(0)
+    const [totalSundae, setTotalSundae] = useState(0)
+    const [totalPurchaseAmount, setTotalPurchaseAmount] = useState(0)
+    const [coneSalesAmount, setConeSalesAmount] = useState(0)
+    const [sundaeSalesAmount, setSundaeSalesAmount] = useState(0)
+    const [coneFlavorSizeSales, setConeFlavorSizeSales] = useState([])
+    const [sundaeFlavorSizeSales, setSundaeFlavorSizeSales] = useState([])
+    const [salesExpensebyMonth, setSalesExpensebyMonth] = useState([])
+    const [salesbyTypes, setSalesbyTypes] = useState({})
+
+    const api = process.env.REACT_APP_ROOT_API
+  
+
+    useEffect(()=> {
+      getTotalSales()
+      getTotalPurchases()
+      getIceCreamSalesbyTypes()
+    }, [])
+
+    const getTotalSales = () => {
+      axios.get(`${api}/analytics/total_sales_amount`)
+        .then(response => {
+          setTotalSaleAmount(response.data.total_amount)
+        })
+    }
+    
+    const getTotalPurchases = () => {
+      axios.get(`${api}/analytics/total_purchases_amount`)
+        .then(response => {
+          setTotalPurchaseAmount(response.data.total_amount)
+        })
+    }
+
+    const getIceCreamSalesbyTypes = () => {
+      axios.get(`${api}/analytics/get_sales_by_types`)
+        .then(response => {
+          setSalesbyTypes(response.data)
+        })
+    }
+
+    
+
+    const getConeSalesAmount  = () => {
+      return 1000
+    }
+
+    const getSundaeSalesAmount = () => {
+      return 1000
+    }
+
+    const getTotalSundaeCount = () => {
+
+    }
+
+    const getTotalSaleCount = () => {
+      return totalSundae + totalCone
+    }
+
+
+    const totalEarnings = totalSaleAmount - totalPurchaseAmount;
+
+    
+  
+
+  
+    // const profitByMonth = Object.keys({ ...earningsByMonth, ...expensesByMonth }).reduce((acc, month) => {
+    //   acc[month] = (earningsByMonth[month] || 0) - (expensesByMonth[month] || 0);
+    //   return acc;
+    // }, {});
+  
+  
+  return (
+    <div className="analytics-container">
+      <h1 className="analytics-heading">Analytics Dashboard</h1>
+      <div className="summary">
+        <div className="summary-item">Total Ice Creams Sold: {getTotalSaleCount()}</div>
+        <div className="summary-item">Total Cones Sold: {totalCone}</div>
+        <div className="summary-item">Total Sundaes Sold: {totalSundae}</div>
+        <div className="summary-item">Total Ice Creams Sales: {totalSaleAmount}</div>
+        <div className="summary-item">Total Purchase Amount: PHP {totalPurchaseAmount}</div>
+        <div className="summary-item">Total Earnings: PHP {totalEarnings}</div>
+      </div>
+
+      <h2 className="analytics-heading">
+        Sales by Flavor and Size in Cones (Total: PHP {getConeSalesAmount()})
+        </h2>
+        <table className="analytics-table">
+        <thead>
+            <tr>
+            <th>Flavor</th>
+            <th>Size</th>
+            <th>Count</th>
+            <th>Total Earnings (PHP)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {Object.entries(coneFlavorSizeSales).map(([key, count]) => {
+            const [flavor, size] = key.split(' - ');
+            return (
+                <tr key={key}>
+                <td>{flavor}</td>
+                <td>{size}</td>
+                <td>{count}</td>
+                <td>{coneFlavorSizeSales[key].toFixed(2)}</td>
+                </tr>
+            );
+            })}
+        </tbody>
+        </table>
+
+
+        <h2 className="analytics-heading">
+            Sales by Flavor and Size in Sundaes (Total: PHP {getSundaeSalesAmount()})
+            </h2>
+            <table className="analytics-table">
+            <thead>
+            <tr>
+            <th>Flavor</th>
+            <th>Size</th>
+            <th>Count</th>
+            <th>Total Earnings (PHP)</th>
+            </tr>
+            </thead>
+            <tbody>
+            {Object.entries(sundaeFlavorSizeSales).map(([key, count]) => {
+            return (
+            <tr key={key}>
+                <td>{key}</td>
+                <td>{key}</td>
+                <td>{key}</td>
+                <td>{sundaeFlavorSizeSales[key].toFixed(2)}</td>
+            </tr>
+            );
+            })}
+            </tbody>
+            </table>
+
+      <h2 className="analytics-heading">Profits by Month</h2>
+
+    </div>
+  );
+}
+
+export default Analytics;

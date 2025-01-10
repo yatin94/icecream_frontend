@@ -1,0 +1,21 @@
+/* src/Flavors.css */
+.flavors-container {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    max-height: 600px; /* Increased height for better visibility on tablets */
+    gap: 10px; /* Space between buttons */
+    padding: 10px;
+}
+
+.flavors-container button {
+    width: calc(25% - 20px); /* Subtracting the total horizontal gap (10px on each side) */
+    padding: 20px 20px; /* Increased padding for larger touch area */
+    font-size: 18px; /* Larger font size for better readability on tablets */
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 5px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+

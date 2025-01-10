@@ -1,0 +1,40 @@
+.analytics-container {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .analytics-heading {
+    color: #333;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 20px;
+  }
+  
+  .analytics-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  
+  .analytics-table th,
+  .analytics-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .analytics-table th {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .summary {
+    font-size: 18px;
+    margin-top: 20px;
+  }
+  
+  .summary-item {
+    margin-bottom: 10px;
+  }
