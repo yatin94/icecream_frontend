@@ -62,8 +62,8 @@ const Analytics = () => {
         <tbody>
           <tr>
             <td>{summaryData.total_ice_creams_sold}</td>
-            <td>${summaryData.total_sales_amount}</td>
-            <td>${summaryData.total_expenses_amount}</td>
+            <td>PHP {summaryData.total_sales_amount}</td>
+            <td>PHP {summaryData.total_expenses_amount}</td>
             <td>{summaryData.total_cones_sold}</td>
             <td>{summaryData.total_sundae_sold}</td>
           </tr>
@@ -74,11 +74,11 @@ const Analytics = () => {
       <Tabs defaultActiveKey="cones" id="product-tabs" className="mb-3">
         <Tab eventKey="cones" title="Cones" tabClassName="fw-bold text-primary">
           <ProductsTable products={cones} />
-          <p className="fw-bold">Total Sales Amount: ${calculateTotalEarnings(cones)}</p>
+          <p className="fw-bold">Total Sales Amount: PHP {calculateTotalEarnings(cones)}</p>
         </Tab>
         <Tab eventKey="sundaes" title="Sundaes" tabClassName="fw-bold text-primary">
           <ProductsTable products={sundaes} />
-          <p className="fw-bold">Total Sales Amount: ${calculateTotalEarnings(sundaes)}</p>
+          <p className="fw-bold">Total Sales Amount: PHP {calculateTotalEarnings(sundaes)}</p>
         </Tab>
       </Tabs>
 
@@ -100,9 +100,9 @@ const Analytics = () => {
           {monthlyEarnings.map((item, index) => (
             <tr key={index}>
               <td>{item.month}</td>
-              <td>${item.expense}</td>
-              <td>${item.earnings}</td>
-              <td>${item.profit}</td>
+              <td>PHP {item.expense}</td>
+              <td>PHP {item.earnings}</td>
+              <td style={{ color: item.profit < 0 ? 'red' : 'green' }}>PHP {item.profit}</td>
             </tr>
           ))}
         </tbody>
@@ -129,7 +129,7 @@ const ProductsTable = ({ products }) => (
             <td>{product.flavor}</td>
             <td>{product.size}</td>
             <td>{product.count}</td>
-            <td>${product.total_earnings}</td>
+            <td>PHP {product.total_earnings}</td>
           </tr>
         ))}
       </tbody>

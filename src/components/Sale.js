@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container, Row, Col, Button, Modal, Form } from 'react-bootstrap';
+import { Table, Container, Row, Alert, Col, Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+
+
 
 function App() {
   const [billId, setBillId] = useState('');
@@ -18,10 +20,11 @@ function App() {
   const [toppings, setToppings] = useState([]);
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
+  const [purchases, setPurchases] = useState([]);
+  const [notification, setNotification] = useState('');
   
   // Sample data structure for purchases. This would be managed by state in a real application.
-  const [purchases, setPurchases] = useState([]);
+
   const api = process.env.REACT_APP_ROOT_API
 
   useEffect(() => {
@@ -96,7 +99,7 @@ function App() {
       })
       .then(data => {
         console.log('Success:', data);
-        alert('Payment successful!');
+        // alert('Payment successful!');
         resetData();
       })
       .catch((error) => {
@@ -106,7 +109,22 @@ function App() {
   };
 
   const resetData = () => {
-    window.location.reload()
+    setNotification('Payment successfully Captured!');
+    setBillId('');
+    setShowPaymentModal(false);
+    setPaymentType('');
+    setAmountGiven('');
+    setSelectedFlavor(null);
+    setSelectedType(null);
+    setSelectedSize(null);
+    setTypes([])
+    setSizes([])
+    setToppings([])
+    setSelectedToppings([])
+    setShowModal(false)
+    setPurchases([])
+    setTimeout(() => setNotification(''), 3000);
+    // window.location.reload()
   }
 
 
@@ -457,6 +475,7 @@ function App() {
       </Modal>
 
 
+      {notification && <Alert variant="info" className="notification-alert">{notification}</Alert>}
     </Container>
   );
 }

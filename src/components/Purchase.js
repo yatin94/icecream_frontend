@@ -13,6 +13,13 @@ function Purchase() {
       fetchPurchases();
       }, []);
 
+      useEffect(() => {
+        if (price && quantity) { // Check if price and quantity are not empty
+          const calculatedTotal = parseFloat(price) * parseInt(quantity, 10);
+          setTotalCost(calculatedTotal.toString());
+        }
+      }, [price, quantity]);
+    
       const fetchPurchases = async () => {
         try {
           const response = await fetch(`${api}/purchases`);
@@ -74,7 +81,7 @@ function Purchase() {
       <input type="text" placeholder="Name" value={name} className='input' onChange={e => setName(e.target.value)} required />
       <input type="number" placeholder="Price per Unit" value={price} className='input' onChange={e => setPrice(e.target.value)} required />
       <input type="number" placeholder="Quantity" value={quantity} className='input' onChange={e => setQuantity(e.target.value)} required />
-      <input type="text" placeholder="Total Cost" value={totalCost} className='input' onClick={handleTotalCost} readOnly />
+      <input type="text" placeholder="Total Cost" value={totalCost}  className='input' onChange={e => setTotalCost(e.target.value)} required />
       <button type="submit" className='button'>Add Purchase</button>
       </form>
 
