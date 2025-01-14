@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
+import { TextField, Box, Typography, Button } from '@mui/material';
+
+
 const api = process.env.REACT_APP_ROOT_API
 
 const Analytics = () => {
+  // 
+  let currentDate = new Date()
+  let tomorrowDate = new Date();
+  tomorrowDate.setDate(currentDate.getDate() + 1);
+  currentDate = currentDate.toISOString("YYYY-mm-dd").slice(0,10)
+  tomorrowDate= tomorrowDate.toISOString("YYYY-mm-dd").slice(0,10)
+
+  const [startDate, setStartDate] = useState(currentDate);
+  const [endDate, setEndDate] = useState(tomorrowDate);
+  const [key, setKey] = useState(0);  // Create a key state
+
   const [summaryData, setSummaryData] = useState({});
   const [cones, setCones] = useState([]);
   const [sundaes, setSundaes] = useState([]);
@@ -12,42 +25,101 @@ const Analytics = () => {
 
   useEffect(() => {
     // Fetch summary data
-    axios.get(`${api}/analytics/summary`)
+    axios.get(addDateFilter(`${api}/analytics/summary`))
       .then(response => {
         setSummaryData(response.data);
       })
       .catch(error => console.error('Error fetching summary data:', error));
 
+
     // Fetch cones data
-    axios.get(`${api}/analytics/cone`)
+    axios.get(addDateFilter(`${api}/analytics/cone`))
       .then(response => {
         setCones(response.data);
       })
       .catch(error => console.error('Error fetching cones data:', error));
 
     // Fetch sundaes data
-    axios.get(`${api}/analytics/sundae`)
+    axios.get(addDateFilter(`${api}/analytics/sundae`))
       .then(response => {
         setSundaes(response.data);
       })
       .catch(error => console.error('Error fetching sundaes data:', error));
 
     // Fetch monthly earnings data
-    axios.get(`${api}/analytics/monthly_earnings`)
-    .then(response => {
-      setMonthlyEarnings(response.data.data);
-    })
-    .catch(error => console.error('Error fetching monthly earnings data:', error));
-  }, []);
+    axios.get(addDateFilter(`${api}/analytics/monthly_earnings`))
+      .then(response => {
+        setMonthlyEarnings(response.data.data);
+      })
+      .catch(error => console.error('Error fetching monthly earnings data:', error));
+  }, [startDate, endDate]);
 
   const calculateTotalEarnings = (items) => {
     return items.reduce((acc, curr) => acc + curr.total_earnings, 0).toFixed(2);
   };
 
+  const addDateFilter = (url) => {
+    if(startDate != '' && endDate != ''){
+      url = `${url}?start_date=${startDate}&end_date=${endDate}`
+    }
+    else if(startDate != '' && endDate == ''){
+      url = `${url}?start_date=${startDate}`
+    }
+    else if(startDate == '' && endDate != '') {
+      url = `${url}?end_date=${endDate}`
+    }
+    else if(startDate == '' && endDate == '') {
+      url = `${url}`
+    }
+    return url
+  }
+
+  const handleClear = () => {
+    setStartDate('')
+    setEndDate('')
+  }
+
   return (
-    <div>
-      <h1>Analytics Dashboard</h1>
-      
+    <Box
+      sx={{
+        margin: 1,
+        padding: 1,
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        backgroundColor: '#f9f9f9',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <Typography variant="h6" gutterBottom>
+        Select Date Range
+      </Typography>
+      <Box
+        display="flex"
+      >
+        <TextField
+          label="Start Date"
+          type="date"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          style={{ paddingRight: '12px' }}
+
+        />
+        <TextField
+          label="End Date"
+          type="date"
+          value={endDate}
+          onChange={e => setEndDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
+        <Button
+        variant="outlined"
+        color="primary"
+        onClick={handleClear}
+      >
+        Clear Dates
+      </Button>
+      </Box>
       {/* Section 1: Summary Table */}
       <Table striped bordered hover>
         <thead>
@@ -69,7 +141,7 @@ const Analytics = () => {
           </tr>
         </tbody>
       </Table>
-        <br></br>
+      <br></br>
       {/* Section 2: Tabs for Cones and Sundaes */}
       <Tabs defaultActiveKey="cones" id="product-tabs" className="mb-3">
         <Tab eventKey="cones" title="Cones" tabClassName="fw-bold text-primary">
@@ -88,52 +160,53 @@ const Analytics = () => {
       <div>
         <h3>Monthly Earnings</h3>
         <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Expense</th>
-            <th>Earnings</th>
-            <th>Profits</th>
-          </tr>
-        </thead>
-        <tbody>
-          {monthlyEarnings.map((item, index) => (
-            <tr key={index}>
-              <td>{item.month}</td>
-              <td>PHP {item.expense}</td>
-              <td>PHP {item.earnings}</td>
-              <td style={{ color: item.profit < 0 ? 'red' : 'green' }}>PHP {item.profit}</td>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Expense</th>
+              <th>Earnings</th>
+              <th>Profits</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {monthlyEarnings.map((item, index) => (
+              <tr key={index}>
+                <td>{item.month}</td>
+                <td>PHP {item.expense}</td>
+                <td>PHP {item.earnings}</td>
+                <td style={{ color: item.profit < 0 ? 'red' : 'green' }}>PHP {item.profit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
 
       </div>
-    </div>
+    </Box>
+
   );
 };
 
 const ProductsTable = ({ products }) => (
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>Flavor</th>
-          <th>Size</th>
-          <th>Count</th>
-          <th>Total Earnings</th>
+  <Table striped bordered hover>
+    <thead>
+      <tr>
+        <th>Flavor</th>
+        <th>Size</th>
+        <th>Count</th>
+        <th>Total Earnings</th>
+      </tr>
+    </thead>
+    <tbody>
+      {products.map((product, index) => (
+        <tr key={index}>
+          <td>{product.flavor}</td>
+          <td>{product.size}</td>
+          <td>{product.count}</td>
+          <td>PHP {product.total_earnings}</td>
         </tr>
-      </thead>
-      <tbody>
-        {products.map((product, index) => (
-          <tr key={index}>
-            <td>{product.flavor}</td>
-            <td>{product.size}</td>
-            <td>{product.count}</td>
-            <td>PHP {product.total_earnings}</td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  );
+      ))}
+    </tbody>
+  </Table>
+);
 
 export default Analytics;

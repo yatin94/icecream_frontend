@@ -1,30 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
-import { Form, Button, Alert, InputGroup, FormControl, Row, Col, Tabs, Tab } from 'react-bootstrap';
+import { Form, Button, Alert, InputGroup, FormControl, Row, Col, Tabs, Tab, FormCheck } from 'react-bootstrap';
 
 
 function AddFlavor() {
   const [flavorName, setFlavorName] = useState('');
   const [activeKey, setActiveKey] = React.useState('cone'); // 'cone' is selected by default
-  const [sundaePrices, setSundaePrices] = React.useState({ small: 0, medium: 0, large: 0 });
-  const [conePrices, setConePrices] = React.useState({ small: 0, medium: 0, large: 0 });
-  const [flavors, setFlavors] = useState([]);
+  const [prices, setPrices] = React.useState({ small: 0, medium: 0, large: 0 });
+  const [coneFlavors, setConeFlavors] = useState([]);
+  const [sundaeFlavors, setSundaeFlavors] = useState([]);
+  const [isSundae, setIsSundae] = useState('false')
   const [notification, setNotification] = useState('');
+  const [typeName, setTypeName] = useState("Cone")
   const api = process.env.REACT_APP_ROOT_API
 
   useEffect(() => {
     fetchFlavors();
   }, []);
 
-
-  const fetchFlavors = async () => {
+  const fetchConeFlavors = async () => {
     try {
-      const response = await fetch(`${api}/flavors?all=True`);
+      const response = await fetch(`${api}/flavors?all=True&type=cone`);
       const data = await response.json();
-      setFlavors(data);
+      setConeFlavors(data);
     } catch (error) {
       console.error('Failed to fetch flavors:', error);
     }
+  }
+
+  const fetchSundaeFlavors = async () => {
+    try {
+      const response = await fetch(`${api}/flavors?all=True&type=sundae`);
+      const data = await response.json();
+      setSundaeFlavors(data);
+    } catch (error) {
+      console.error('Failed to fetch flavors:', error);
+    }
+  }
+
+  const fetchFlavors = async () => {
+    await fetchSundaeFlavors()
+    await fetchConeFlavors()
   };
 
   const handleSubmit = async (e) => {
@@ -37,10 +53,8 @@ function AddFlavor() {
         },
         body: JSON.stringify({
           flavor_name: flavorName,
-          types: {
-            sundae: sundaePrices,
-            cone: conePrices
-          }
+          sizes: prices,
+          sundae: isSundae
         })
       });
       if (response.ok) {
@@ -73,6 +87,16 @@ function AddFlavor() {
     setTimeout(() => setNotification(''), 3000);
   };
 
+  const handleSundaeCheckboxChange = () => {
+    if( isSundae == "true"){
+      setTypeName("Cone")
+      setIsSundae("false")
+    }else{
+      setTypeName("Sundae")
+      setIsSundae("true")
+    }
+  }
+
   return (
     <div>
       <Form onSubmit={handleSubmit}>
@@ -91,7 +115,7 @@ function AddFlavor() {
     onSelect={(k) => setActiveKey(k)}
     className="mb-3"
   >
-    <Tab eventKey="sundae" title="Sundae">
+    <Tab eventKey="cone" title={typeName}>
       <Row>
         {['small', 'medium', 'large'].map((size) => (
           <Col key={size}>
@@ -99,24 +123,8 @@ function AddFlavor() {
               <InputGroup.Text>{size.charAt(0).toUpperCase() + size.slice(1)}</InputGroup.Text>
               <FormControl 
                 type="text"
-                value={sundaePrices[size]}
-                onChange={(e) => setSundaePrices({...sundaePrices, [size]: e.target.value})}
-              />
-            </InputGroup>
-          </Col>
-        ))}
-      </Row>
-    </Tab>
-    <Tab eventKey="cone" title="Cone">
-      <Row>
-        {['small', 'medium', 'large'].map((size) => (
-          <Col key={size}>
-            <InputGroup className="mb-3">
-              <InputGroup.Text>{size.charAt(0).toUpperCase() + size.slice(1)}</InputGroup.Text>
-              <FormControl 
-                type="text"
-                value={conePrices[size]}
-                onChange={(e) => setConePrices({...conePrices, [size]: e.target.value})}
+                value={prices[size]}
+                onChange={(e) => setPrices({...prices, [size]: e.target.value})}
               />
             </InputGroup>
           </Col>
@@ -124,27 +132,55 @@ function AddFlavor() {
       </Row>
     </Tab>
   </Tabs>
+  
+  <FormCheck id="custom-checkbox" label="Is Sundae" checked={isSundae == "false"?false:true} onChange={handleSundaeCheckboxChange} className='mb-3'></FormCheck>
 
   <Button variant="primary" type="submit">
     Submit
   </Button>
   {notification && <Alert variant="info" className="mt-3">{notification}</Alert>}
 </Form>
-
+        <h3>Cones</h3>
       <Table striped bordered hover className="mt-4">
         <thead>
           <tr>
             <th>#</th>
             <th>Name</th>
+            <th>Is Sundae</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
 
-          {flavors.map(flavor => (
+          {coneFlavors.map(flavor => (
             <tr>
               <td>{flavor.id}</td>
               <td>{flavor.flavor_name}</td>
+              <td>{flavor.is_sundae == 1? 'YES':'NO'}</td>
+              <td><Button variant="danger" onClick={() => handleDelete(flavor.id)} className="float-right">
+                Delete
+              </Button></td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+          <h3>Sundaes</h3>
+      <Table striped bordered hover className="mt-4">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Is Sundae</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          {sundaeFlavors.map(flavor => (
+            <tr>
+              <td>{flavor.id}</td>
+              <td>{flavor.flavor_name}</td>
+              <td>{flavor.is_sundae == 1? 'YES':'NO'}</td>
               <td><Button variant="danger" onClick={() => handleDelete(flavor.id)} className="float-right">
                 Delete
               </Button></td>

@@ -9,11 +9,11 @@ function App() {
   const [billId, setBillId] = useState('');
   const [customerName, setCustomerName] = useState('Ice Cream Shop');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [flavors, setFlavors] = useState([]);
+  const [coneFlavors, setConeFlavors] = useState([]);
+  const [sundaeFlavors, setsundaeFlavors] = useState([]);
   const [paymentType, setPaymentType] = useState('');
   const [amountGiven, setAmountGiven] = useState('');
   const [selectedFlavor, setSelectedFlavor] = useState(null);
-  const [types, setTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizes, setSizes] = useState([]);
@@ -28,41 +28,58 @@ function App() {
   const api = process.env.REACT_APP_ROOT_API
 
   useEffect(() => {
-    axios.get(`${api}/flavors/`)
+    axios.get(`${api}/flavors?type=sundae`)
       .then(response => {
-        setFlavors(response.data)
-        console.log("Flavors ")
-        console.log(response.data)
+        setsundaeFlavors(response.data)
       })
       .catch(error => console.error('Error fetching flavors:', error));
 
-    axios.get(`${api}/sales/generate_bill_id`)
+    axios.get(`${api}/flavors?type=cone`)
       .then(response => {
-        setBillId(response.id)
-        console.log("bill id  ")
-        console.log(response.id)
+        setConeFlavors(response.data)
       })
       .catch(error => console.error('Error fetching flavors:', error));
-  }, []);
+}, []);
 
 
-  const handleFlavorSelect = (flavor) => {
+  const handleConeFlavorSelect = (flavor, size) => {
     setSelectedFlavor(flavor);
-    axios.get(`${api}/types/${flavor.id}`)
+    setSelectedType("Cone")
+    setSelectedSize(size)
+    addItemToBill(flavor, 'Cone', size, []);
+  };
+
+  const handleSundaeFlavorSelect = (flavor) => {
+    setSelectedType('Sundae');
+    setSelectedFlavor(flavor);
+    axios.get(`${api}/sizes/${flavor.id}`)
       .then(response => {
-        setTypes(response.data);
+        setSizes(response.data)
         setShowModal(true);
+        if(response.data.length == 1){
+          handleSizeSelect(response.data[0])
+        }
       })
       .catch(error => console.error('Error fetching types:', error));
   };
 
-  const handleTypeSelect = (type) => {
-    setSelectedType(type);
-    axios.get(`${api}/sizes/${selectedFlavor.id}/${type.id}`)
-      .then(response => {
-        setSizes(response.data);
-      })
-      .catch(error => console.error('Error fetching sizes:', error));
+
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
+    axios.get(`${api}/toppings`)
+      .then(response => setToppings(response.data))
+      .catch(error => console.error('Error fetching toppings:', error));
+  };
+
+  const handleSubmit = () => {
+    addItemToBill(selectedFlavor, selectedType, selectedSize, selectedToppings);
+    setShowModal(false);
+    setSelectedSize(null);
+    setSelectedFlavor(null);
+    setSelectedToppings([]);
+    setSelectedType(null);
+    setToppings([])
+    setSizes([])
   };
 
   const handlePaymentSubmit = () => {
@@ -117,7 +134,6 @@ function App() {
     setSelectedFlavor(null);
     setSelectedType(null);
     setSelectedSize(null);
-    setTypes([])
     setSizes([])
     setToppings([])
     setSelectedToppings([])
@@ -128,14 +144,7 @@ function App() {
   }
 
 
-  const handleSizeSelect = (size) => {
-    setSelectedSize(size);
-    if (selectedType.type === 'Sundae') {
-      axios.get(`${api}/toppings`)
-        .then(response => setToppings(response.data))
-        .catch(error => console.error('Error fetching toppings:', error));
-    }
-  };
+
 
   const calculateTotalToppingsCost = () => {
     return selectedToppings.reduce((acc, topping) => {
@@ -158,17 +167,7 @@ function App() {
     return topping ? topping.scoops : 0;
   };
 
-  const handleSubmit = () => {
-    addItemToBill(selectedFlavor, selectedType, selectedSize, selectedToppings);
-    setShowModal(false);
-    setSelectedSize(null);
-    setSelectedFlavor(null);
-    setSelectedToppings([]);
-    setSelectedType(null);
-    setToppings([])
-    setSizes([])
-    setTypes([])
-  };
+
 
 
 
@@ -269,7 +268,7 @@ function App() {
                     <tr key={index + 1}>
                       <td>{index + 1}</td>
                       <td>{purchase.flavor.flavor_name}</td>
-                      <td>{purchase.type.type}</td>
+                      <td>{purchase.type}</td>
                       <td>{purchase.size.name}</td>
                       <td>
                         {purchase.toppings.map(topping => `${topping.name} x${topping.scoops}`).join(', ')}
@@ -312,44 +311,67 @@ function App() {
 
         {/* Flavors */}
         <Col md={4} style={{ padding: '20px', backgroundColor: '#e9ecef' }}>
-          {flavors.map(flavor => (
+        <Row>
+        <Col md={12}>
+          <h2>Cones</h2>
+          {coneFlavors.map(flavor => (
+            <Row key={flavor.name} style={{ backgroundColor: '#f1f1f1', marginBottom: '20px', padding: '10px' }}>
+              <Col md={12}>
+                <Row>
+                  {flavor.size.map(flavorsize => (
+                    <Col key={flavorsize.id} xs={6} md={4} lg={3} style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleConeFlavorSelect(flavor, flavorsize)}
+                        style={{
+                          width: '100%',
+                          height: '100px',  // Standard height for all buttons
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          padding: '10px 20px',
+                          fontSize: '1em'
+                        }}
+                      >
+                        {flavorsize.name} {flavor.flavor_name}
+                        <div style={{ fontSize: '0.9em', marginTop: '5px' }}>
+                          Price: ${flavorsize.price}
+                        </div>
+                      </Button>
+                    </Col>
+                  ))}
+                </Row>
+              </Col>
+            </Row>
+          ))}
+        </Col>
+          <Col md={12} style={{ padding: '20px', backgroundColor: '#e9ecef' }}>
+          <h2>Sundaes</h2>
+          {sundaeFlavors.map(flavor => (
             <Button
               key={flavor.id}
               variant="primary"
-              onClick={() => handleFlavorSelect(flavor)}
-              style={{ margin: '10px', padding: '10px 20px', fontSize: '1.2em' }}
+              onClick={() => handleSundaeFlavorSelect(flavor)}
+            style={{ width: '6em', height: '6em', justifyContent: 'center', alignItems: 'center', margin: '10px', fontSize: '1.2em' }}
             >
               {flavor.flavor_name}
             </Button>
           ))}
+          </Col>
+        </Row>
+          
         </Col>
       </Row>
 
 
 
-      {/* Sizes and types */}
+      {/* Sizes and Toppings */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Select Type and Size</Modal.Title>
+          <Modal.Title>Select Size</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-            {types.map(type => (
-              <Button
-                key={type.count}
-                onClick={() => handleTypeSelect(type)}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '1em',
-                  flex: '1 1 auto',
-                  backgroundColor: selectedType ? selectedType.id === type.id ? 'green' : undefined : undefined
-                }}
-              >
-                {type.type}
-              </Button>
-            ))}
-
-          </div>
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
             {sizes.map(size => (
               <Button
